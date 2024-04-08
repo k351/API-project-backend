@@ -1,5 +1,6 @@
 const usersRepository = require('./users-repository');
 const { hashPassword } = require('../../../utils/password');
+const { passwordMatched } = require('../../../utils/password');
 
 /**
  * Get list of users
@@ -123,6 +124,43 @@ async function checkEmailAvailability(email) {
   }
 }
 
+/**
+ * Update existing user
+ * @param {string} id - User ID
+ * @param {string} password - password
+ * @returns {boolean}
+ */
+
+async function changePassword(id, password) {
+  const user = await usersRepository.changePassword(id, password);
+
+  if (!user) {
+    return false; // Return false if user not found or password doesn't match
+  }
+
+  return true; // Return true if user found and password matches
+}
+
+/**
+ * Check username and password for login.
+ * @param {string} id - Email
+ * @param {string} password - Password
+ * @returns {object} An object containing, among others if the email and password are matched. Otherwise returns null.
+ */
+async function checkLoginCredentials(id, password) {
+  const user = await usersRepository.getUser(id);
+
+  // We define default user password here as '<RANDOM_PASSWORD_FILTER>'
+  // to handle the case when the user login is invalid. We still want to
+  // check the password anyway, so that it prevents the attacker in
+  // guessing login credentials by looking at the processing time.
+  const userPassword = user ? user.password : '<RANDOM_PASSWORD_FILLER>';
+  const passwordChecked = await passwordMatched(password, userPassword);
+
+  return passwordChecked;
+}
+
+
 module.exports = {
   getUsers,
   getUser,
@@ -130,4 +168,6 @@ module.exports = {
   updateUser,
   deleteUser,
   checkEmailAvailability,
+  changePassword,
+  checkLoginCredentials,
 };

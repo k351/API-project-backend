@@ -1,4 +1,5 @@
 const { User } = require('../../../models');
+const { hashPassword } = require('../../../utils/password');
 
 /**
  * Get a list of users
@@ -72,6 +73,29 @@ async function checkIfUserExistsByEmail(email) {
   return user; // Return true if user exists, false otherwise
 }
 
+/**
+ * Update existing user
+ * @param {string} id - User ID
+ * @param {string} password - Email
+ * @returns {Promise}
+ */
+async function changePassword(id, password) {
+  // Hash the new password
+  const hashedPassword = await hashPassword(password);
+
+  // Update the user's password in the database
+  return User.updateOne(
+    {
+      _id: id,
+    },
+    {
+      $set: {
+        password: hashedPassword, // Set the hashed password in the database
+      },
+    }
+  );
+}
+
 module.exports = {
   getUsers,
   getUser,
@@ -79,4 +103,5 @@ module.exports = {
   updateUser,
   deleteUser,
   checkIfUserExistsByEmail,
+  changePassword,
 };
