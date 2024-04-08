@@ -107,10 +107,27 @@ async function deleteUser(id) {
   return true;
 }
 
+/**
+ * Check if email is available (not already in use)
+ * @param {string} email - Email to check
+ * @returns {Promise<boolean>}
+ */
+async function checkEmailAvailability(email) {
+  try {
+    // Panggil fungsi dari repository untuk memeriksa ketersediaan email
+    const isAvailable = await usersRepository.checkIfUserExistsByEmail(email);
+    return isAvailable;
+  } catch (error) {
+    console.error('Error checking email availability:', error);
+    throw new Error('Error checking email availability');
+  }
+}
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUser,
   deleteUser,
+  checkEmailAvailability,
 };
