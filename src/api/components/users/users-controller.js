@@ -50,7 +50,9 @@ async function createUser(request, response, next) {
     const name = request.body.name;
     const email = request.body.email;
     const password = request.body.password;
+    const passwordConfirm = request.body.passwordConfirm;
 
+    // Check if the email is already in use
     const emailExists = await usersService.checkEmailAvailability(email);
     if (emailExists) {
       throw errorResponder(
@@ -58,6 +60,13 @@ async function createUser(request, response, next) {
       )
     }
 
+    if(passwordConfirm !== password){
+      throw errorResponder (
+        errorTypes.INVALID_PASSWORD
+      )
+    }
+
+    // If the email is available, proceed to create the user
     const success = await usersService.createUser(name, email, password);
     if (!success) {
       throw errorResponder(
